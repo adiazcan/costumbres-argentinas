@@ -1,8 +1,9 @@
 /**
  * Pizzería Costumbres Argentinas – Main Application Script
  *
- * Menu data is loaded from data/menu.json.
- * To update the menu, edit data/menu.json only – no code changes needed.
+ * Restaurant info is loaded from data/restaurant.md (YAML frontmatter).
+ * Menu data is loaded from data/menu.md (structured Markdown).
+ * To update the menu or restaurant info, edit those files only – no code changes needed.
  */
 
 'use strict';
@@ -320,17 +321,212 @@ function setupSearch() {
   });
 }
 
+/* ── Markdown parsers ────────────────────────────────────── */
+
+/**
+ * Parse data/restaurant.md.
+ * Expects a YAML-style frontmatter block between the first pair of --- lines.
+ * Each line inside the block is treated as  key: value.
+ * Values may be optionally wrapped in single or double quotes.
+ */
+function parseRestaurantMd(text) {
+  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) throw new Error('restaurant.md: frontmatter block not found');
+
+  const fm = {};
+  match[1].split(/\r?\n/).forEach((line) => {
+    const colonIdx = line.indexOf(':');
+    if (colonIdx === -1) return;
+    const key = line.slice(0, colonIdx).trim();
+    const value = line.slice(colonIdx + 1).trim().replace(/^["']|["']$/g, '');
+    fm[key] = value;
+  });
+
+  return {
+    name:        fm.name        || '',
+    tagline:     fm.tagline     || '',
+    description: fm.description || '',
+    address:     fm.address     || '',
+    phone:       fm.phone       || '',
+    whatsapp:    fm.whatsapp    || '',
+    email:       fm.email       || '',
+    hours: {
+      weekdays: fm.hours_weekdays || '',
+      weekends: fm.hours_weekends || '',
+    },
+    social: {
+      instagram: fm.instagram || '',
+      facebook:  fm.facebook  || '',
+    },
+  };
+}
+
+/**
+ * Parse data/menu.md.
+ *
+ * Structure expected:
+ *
+ *   # Menú …                          (ignored H1)
+ *
+ *   ## category-id | 🍕 | Category Name
+ *   > Category description
+ *
+ *   ### Item Name | tag1, tag2        (tags are optional)
+ *   Item description text
+ *   - priceKey: numericValue
+ *
+ *   # Promociones                     (second H1 separates promos)
+ *
+ *   ## Promo Title
+ *   Promo description
+ *   - price: numericValue
+ *   - note: text
+ */
+function parseMenuMd(text) {
+  // Strip HTML comments so the "how to update" block doesn't interfere
+  const cleaned = text.replace(/<!--[\s\S]*?-->/g, '');
+
+  // Split on the second H1 heading ("# Promociones")
+  const promoSplit = cleaned.split(/\n# Promociones\b/);
+  const menuSection   = promoSplit[0]  || '';
+  const promosSection = promoSplit[1]  || '';
+
+  /* ── helpers ── */
+  function parsePrices(lines) {
+    const prices = {};
+    lines.forEach((line) => {
+      const m = line.match(/^-\s+(\w+):\s*(.+)/);
+      if (m) prices[m[1]] = Number(m[2]);
+    });
+    return prices;
+  }
+
+  function parseItems(sectionText) {
+    // Split on lines that begin with ### (item headings)
+    const blocks = sectionText.split(/\n(?=### )/);
+    const items = [];
+    for (const block of blocks) {
+      const lines = block.split(/\r?\n/);
+      const heading = lines[0];
+      if (!heading.startsWith('### ')) continue;
+
+      // ### Item Name | tag1, tag2  (tags optional)
+      const parts = heading.slice(4).split('|').map((s) => s.trim());
+      const itemName = parts[0];
+      const tags = parts[1]
+        ? parts[1].split(',').map((t) => t.trim()).filter(Boolean)
+        : [];
+
+      // First non-empty, non-list line after the heading is the description
+      let description = '';
+      const priceLines = [];
+      for (let i = 1; i < lines.length; i++) {
+        const l = lines[i].trim();
+        if (!l) continue;
+        if (l.startsWith('- ')) {
+          priceLines.push(l);
+        } else if (!description) {
+          description = l;
+        }
+      }
+
+      items.push({
+        id:          itemName.toLowerCase().replace(/\s+/g, '-'),
+        name:        itemName,
+        description,
+        prices:      parsePrices(priceLines),
+        tags,
+      });
+    }
+    return items;
+  }
+
+  /* ── parse categories ── */
+  const categories = [];
+  // Split on lines that begin with ## (category headings), skip the opening H1
+  const catBlocks = menuSection.split(/\n(?=## )/);
+  for (const block of catBlocks) {
+    const lines = block.split(/\r?\n/);
+    const heading = lines[0].trim();
+    if (!heading.startsWith('## ')) continue;
+
+    // ## id | icon | Category Name
+    const parts = heading.slice(3).split('|').map((s) => s.trim());
+    if (parts.length < 3) continue;
+    const [id, icon, name] = parts;
+
+    // Description comes from the first > blockquote line
+    let description = '';
+    for (const l of lines.slice(1)) {
+      if (l.startsWith('> ')) { description = l.slice(2).trim(); break; }
+    }
+
+    const items = parseItems(block);
+    categories.push({ id, icon, name, description, items });
+  }
+
+  /* ── parse promos ── */
+  const promos = [];
+  const promoBlocks = promosSection.split(/\n(?=## )/);
+  for (const block of promoBlocks) {
+    const lines = block.split(/\r?\n/);
+    const heading = lines[0].trim();
+    if (!heading.startsWith('## ')) continue;
+
+    const title = heading.slice(3).trim();
+    let description = '';
+    let price = 0;
+    let note = '';
+
+    for (let i = 1; i < lines.length; i++) {
+      const l = lines[i].trim();
+      if (!l) continue;
+      if (l.startsWith('- ')) {
+        const m = l.match(/^-\s+(\w+):\s*(.+)/);
+        if (m) {
+          if (m[1] === 'price') price = Number(m[2]);
+          else if (m[1] === 'note') note = m[2].trim();
+        }
+      } else if (!description) {
+        description = l;
+      }
+    }
+
+    promos.push({
+      id: title.toLowerCase().replace(/\s+/g, '-'),
+      title,
+      description,
+      price,
+      note,
+    });
+  }
+
+  return { categories, promos };
+}
+
 /* ── Data loading ────────────────────────────────────────── */
-async function loadMenuData() {
-  const res = await fetch('./data/menu.json');
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+async function loadData() {
+  const [restaurantRes, menuRes] = await Promise.all([
+    fetch('./data/restaurant.md'),
+    fetch('./data/menu.md'),
+  ]);
+  if (!restaurantRes.ok) throw new Error(`restaurant.md HTTP ${restaurantRes.status}`);
+  if (!menuRes.ok)       throw new Error(`menu.md HTTP ${menuRes.status}`);
+
+  const [restaurantText, menuText] = await Promise.all([
+    restaurantRes.text(),
+    menuRes.text(),
+  ]);
+
+  const restaurant = parseRestaurantMd(restaurantText);
+  const { categories, promos } = parseMenuMd(menuText);
+  return { restaurant, categories, promos };
 }
 
 /* ── Init ────────────────────────────────────────────────── */
 async function init() {
   try {
-    menuData = await loadMenuData();
+    menuData = await loadData();
 
     activeCategory = 'all';
 
