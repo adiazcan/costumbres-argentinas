@@ -1,0 +1,245 @@
+{
+  "restaurant": {
+    "name": "Pizzería Costumbres Argentinas",
+    "tagline": "La auténtica pizza porteña desde 1985",
+    "description": "Somos una pizzería con décadas de tradición en el corazón de Buenos Aires. Nuestras recetas honran la cultura gastronómica porteña con ingredientes frescos de primera calidad, masa artesanal y el toque único que nos convirtió en un clásico de la ciudad.",
+    "address": "Av. Corrientes 1234, Buenos Aires, Argentina",
+    "phone": "+54 11 4321-5678",
+    "whatsapp": "+5491143215678",
+    "email": "info@pizzeriacostumbresargentinas.com",
+    "hours": {
+      "weekdays": "12:00 – 00:00",
+      "weekends": "12:00 – 01:00"
+    },
+    "social": {
+      "instagram": "https://www.instagram.com/costumbresargentinas_pizza/",
+      "facebook": "https://www.facebook.com/costumbresargentinas/"
+    }
+  },
+  "categories": [
+    {
+      "id": "pizzas-clasicas",
+      "name": "Pizzas Clásicas",
+      "icon": "🍕",
+      "description": "Nuestras pizzas más tradicionales al horno de piedra",
+      "items": [
+        {
+          "id": "mozzarella",
+          "name": "Mozzarella",
+          "description": "Salsa de tomate, mozzarella fresca y aceite de oliva",
+          "prices": { "individual": 4500, "media": 7800, "entera": 14500 },
+          "tags": ["vegetariana", "clásica"]
+        },
+        {
+          "id": "fugazzeta",
+          "name": "Fugazzeta",
+          "description": "Cebolla caramelizada, mozzarella abundante y olivas verdes",
+          "prices": { "individual": 4800, "media": 8200, "entera": 15500 },
+          "tags": ["vegetariana", "clásica"]
+        },
+        {
+          "id": "napolitana",
+          "name": "Napolitana",
+          "description": "Salsa de tomate, mozzarella, rodajas de tomate y ajo",
+          "prices": { "individual": 4800, "media": 8200, "entera": 15500 },
+          "tags": ["vegetariana", "clásica"]
+        },
+        {
+          "id": "calabresa",
+          "name": "Calabresa",
+          "description": "Salsa de tomate, mozzarella, longaniza calabresa y cebolla",
+          "prices": { "individual": 5200, "media": 9000, "entera": 17000 },
+          "tags": ["clásica"]
+        },
+        {
+          "id": "jamón-y-morrones",
+          "name": "Jamón y Morrones",
+          "description": "Salsa de tomate, mozzarella, jamón cocido y morrones asados",
+          "prices": { "individual": 5200, "media": 9000, "entera": 17000 },
+          "tags": ["clásica"]
+        },
+        {
+          "id": "cuatro-quesos",
+          "name": "Cuatro Quesos",
+          "description": "Mozzarella, provolone, roquefort y parmesano",
+          "prices": { "individual": 5500, "media": 9500, "entera": 18000 },
+          "tags": ["vegetariana", "especial"]
+        }
+      ]
+    },
+    {
+      "id": "pizzas-especiales",
+      "name": "Pizzas Especiales",
+      "icon": "⭐",
+      "description": "Creaciones únicas de nuestra casa",
+      "items": [
+        {
+          "id": "costumbres",
+          "name": "Costumbres Argentinas",
+          "description": "Salsa criolla, mozzarella, lomo a la pimienta, morrones y aceitunas negras",
+          "prices": { "individual": 6500, "media": 11500, "entera": 21000 },
+          "tags": ["especial", "destacada"]
+        },
+        {
+          "id": "porteña",
+          "name": "La Porteña",
+          "description": "Salsa de tomate, mozzarella, chorizo colorado, cebolla morada y huevo",
+          "prices": { "individual": 6200, "media": 11000, "entera": 20000 },
+          "tags": ["especial"]
+        },
+        {
+          "id": "trufa-y-hongos",
+          "name": "Trufa y Hongos",
+          "description": "Crema de trufa negra, mozzarella, portobellos y hongos de pino",
+          "prices": { "individual": 7200, "media": 13000, "entera": 24000 },
+          "tags": ["especial", "gourmet"]
+        },
+        {
+          "id": "pollo-y-rucula",
+          "name": "Pollo y Rúcula",
+          "description": "Crema, mozzarella, pollo grillado, rúcula fresca y tomates cherry",
+          "prices": { "individual": 6500, "media": 11500, "entera": 21500 },
+          "tags": ["especial"]
+        }
+      ]
+    },
+    {
+      "id": "empanadas",
+      "name": "Empanadas",
+      "icon": "🥟",
+      "description": "Al horno, la mejor docena de Buenos Aires",
+      "items": [
+        {
+          "id": "emp-carne",
+          "name": "Carne Suave",
+          "description": "Carne picada con cebolla, huevo, aceitunas y especias",
+          "prices": { "unidad": 950, "docena": 10500 },
+          "tags": ["clásica"]
+        },
+        {
+          "id": "emp-carne-picante",
+          "name": "Carne Picante",
+          "description": "Carne picada con cebolla, ají molido y especias fuertes",
+          "prices": { "unidad": 950, "docena": 10500 },
+          "tags": ["picante"]
+        },
+        {
+          "id": "emp-jamon-queso",
+          "name": "Jamón y Queso",
+          "description": "Jamón cocido y queso mozzarella fundidos",
+          "prices": { "unidad": 900, "docena": 10000 },
+          "tags": ["vegetariana"]
+        },
+        {
+          "id": "emp-verdura",
+          "name": "Verdura",
+          "description": "Espinaca salteada, huevo duro y queso crema",
+          "prices": { "unidad": 900, "docena": 10000 },
+          "tags": ["vegetariana"]
+        },
+        {
+          "id": "emp-pollo",
+          "name": "Pollo",
+          "description": "Pollo desmenuzado con morrones, cebolla y especias",
+          "prices": { "unidad": 1000, "docena": 11000 },
+          "tags": ["clásica"]
+        }
+      ]
+    },
+    {
+      "id": "bebidas",
+      "name": "Bebidas",
+      "icon": "🥤",
+      "description": "Acompañá tu pizza con nuestras bebidas",
+      "items": [
+        {
+          "id": "coca-cola",
+          "name": "Coca-Cola 500ml",
+          "description": "Coca-Cola regular o sin azúcar",
+          "prices": { "precio": 1800 },
+          "tags": []
+        },
+        {
+          "id": "agua",
+          "name": "Agua mineral 500ml",
+          "description": "Con o sin gas",
+          "prices": { "precio": 1200 },
+          "tags": []
+        },
+        {
+          "id": "cerveza-quilmes",
+          "name": "Cerveza Quilmes 1L",
+          "description": "La clásica cerveza rubia argentina",
+          "prices": { "precio": 3200 },
+          "tags": []
+        },
+        {
+          "id": "vino-tinto",
+          "name": "Vino Tinto Malbec (botella)",
+          "description": "Vino Malbec Mendocino seleccionado",
+          "prices": { "precio": 8500 },
+          "tags": []
+        },
+        {
+          "id": "fernet",
+          "name": "Fernet con Coca 500ml",
+          "description": "Fernet Branca con Coca-Cola",
+          "prices": { "precio": 3800 },
+          "tags": []
+        }
+      ]
+    },
+    {
+      "id": "postres",
+      "name": "Postres",
+      "icon": "🍮",
+      "description": "El dulce final perfecto",
+      "items": [
+        {
+          "id": "flan-casero",
+          "name": "Flan Casero",
+          "description": "Flan artesanal con crema o dulce de leche",
+          "prices": { "precio": 2200 },
+          "tags": ["clásico"]
+        },
+        {
+          "id": "budín-pan",
+          "name": "Budín de Pan",
+          "description": "Budín de pan casero con salsa inglesa",
+          "prices": { "precio": 2200 },
+          "tags": ["clásico"]
+        },
+        {
+          "id": "tiramisú",
+          "name": "Tiramisú",
+          "description": "Tiramisú artesanal con café y mascarpone",
+          "prices": { "precio": 2800 },
+          "tags": ["especial"]
+        }
+      ]
+    }
+  ],
+  "promos": [
+    {
+      "id": "promo-familiar",
+      "title": "Promo Familiar",
+      "description": "2 pizzas enteras + 2 bebidas 1.5L",
+      "price": 32000,
+      "note": "Elegí cualquier pizza clásica"
+    },
+    {
+      "id": "promo-duo",
+      "title": "Promo Dúo",
+      "description": "2 pizzas medianas + 2 bebidas 500ml",
+      "price": 22000,
+      "note": "De lunes a jueves"
+    },
+    {
+      "id": "promo-empanadas",
+      "title": "Promo Empanadas",
+      "description": "Docena de empanadas + 2 gaseosas 500ml",
+      "price": 13500,
+      "note": "Válido para llevar"
+    }
+  ]
+}
