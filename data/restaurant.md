@@ -1,13 +1,20 @@
 ---
 name: Pizzería Costumbres Argentinas
-tagline: La auténtica pizza porteña desde 1985
-description: Somos una pizzería con décadas de tradición en el corazón de Buenos Aires. Nuestras recetas honran la cultura gastronómica porteña con ingredientes frescos de primera calidad, masa artesanal y el toque único que nos convirtió en un clásico de la ciudad.
-address: Av. Corrientes 1234, Buenos Aires, Argentina
-phone: +54 11 4321-5678
-whatsapp: +5491143215678
-email: info@pizzeriacostumbresargentinas.com
-hours_weekdays: 12:00 – 00:00
-hours_weekends: 12:00 – 01:00
-instagram: https://www.instagram.com/costumbresargentinas_pizza/
-facebook: https://www.facebook.com/costumbresargentinas/
+tagline: Sabés lo que comés
+description: Desde 2005 elaboramos cada día de manera artesanal pizzas, empanadas, pastas frescas y especialidades para disfrutar en el local o para llevar.
+address: Calle Toril 2, 50600 Ejea de los Caballeros, Zaragoza, España
+phone: 976 66 33 44
+email:
+hours_primary_label: Horario de atención
+hours_primary: Miércoles a lunes, 20:00 – 23:00
+hours_secondary_label: Cierre semanal
+hours_secondary: Martes cerrado, excepto festivos y vísperas de festivos
+location_label: Ejea de los Caballeros
+footer_signature: Ejea de los Caballeros, Zaragoza
+locale: es-ES
+currency: EUR
+price_digits: 2
+instagram: https://www.instagram.com/costumbresargentinas1341/
+facebook: https://es-es.facebook.com/Pizzeria-Costumbres-Argentinas-207937169236519/?ref=page_internal
+justeat: https://www.just-eat.es/restaurants-pizzeriacostumbresargentinatoril
 ---

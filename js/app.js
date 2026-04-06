@@ -12,6 +12,22 @@
 let menuData = null;
 let activeCategory = null;
 let searchQuery = '';
+let serviceMode = 'onsite';
+let priceFormat = {
+  locale: 'es-AR',
+  currency: 'ARS',
+  digits: 0,
+};
+
+const FEATURED_MENU_MEDIA = {
+  'pizzas-clasicas': {
+    Mozzarella: 'assets/pizza-muzzarella.jpg',
+    Napolitana: 'assets/pizza-napolitana.jpg',
+  },
+  bebidas: {
+    'Coca-Cola 500ml': 'assets/beverage-linea-coca.jpg',
+  },
+};
 
 /* ── DOM helpers ─────────────────────────────────────────── */
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -19,10 +35,11 @@ const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 
 /* ── Formatters ──────────────────────────────────────────── */
 function formatPrice(amount) {
-  return new Intl.NumberFormat('es-AR', {
+  return new Intl.NumberFormat(priceFormat.locale, {
     style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 0,
+    currency: priceFormat.currency,
+    minimumFractionDigits: priceFormat.digits,
+    maximumFractionDigits: priceFormat.digits,
   }).format(amount);
 }
 
@@ -32,13 +49,13 @@ function renderTabs(categories) {
   if (!container) return;
 
   container.innerHTML = `
-    <button class="tab-btn active" data-cat="all">
+    <button type="button" class="tab-btn active" data-cat="all" role="tab" aria-selected="true">
       🍽️ Todo
     </button>
     ${categories
       .map(
         (cat) => `
-      <button class="tab-btn" data-cat="${cat.id}">
+      <button type="button" class="tab-btn" data-cat="${cat.id}" role="tab" aria-selected="false">
         ${cat.icon} ${cat.name}
       </button>
     `
@@ -49,8 +66,12 @@ function renderTabs(categories) {
   container.addEventListener('click', (e) => {
     const btn = e.target.closest('.tab-btn');
     if (!btn) return;
-    $$('.tab-btn', container).forEach((b) => b.classList.remove('active'));
+    $$('.tab-btn', container).forEach((b) => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
     btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
     activeCategory = btn.dataset.cat;
     filterAndRender();
   });
@@ -58,9 +79,9 @@ function renderTabs(categories) {
 
 function buildPriceHTML(prices) {
   const labelMap = {
-    individual: 'Individual',
+    individual: 'Porcion',
     media: 'Media',
-    entera: 'Entera',
+    entera: 'Grande',
     unidad: 'Unidad',
     docena: 'Docena',
     precio: 'Precio',
@@ -77,6 +98,10 @@ function buildPriceHTML(prices) {
     .join('');
 }
 
+function getFeaturedMedia(categoryId, itemName) {
+  return FEATURED_MENU_MEDIA[categoryId]?.[itemName] || null;
+}
+
 function buildTagsHTML(tags) {
   return tags
     .map((t) => {
@@ -86,15 +111,23 @@ function buildTagsHTML(tags) {
     .join('');
 }
 
-function renderMenuCard(item) {
+function renderMenuCard(item, categoryId) {
+  const media = getFeaturedMedia(categoryId, item.name);
   return `
-    <article class="menu-card" data-name="${item.name.toLowerCase()}" data-desc="${item.description.toLowerCase()}">
-      <div class="menu-card-top">
-        <h4 class="menu-card-name">${item.name}</h4>
-        <div class="menu-card-tags">${buildTagsHTML(item.tags)}</div>
+    <article class="menu-card" data-name="${item.name.toLowerCase()}" data-desc="${item.description.toLowerCase()}" data-tags="${item.tags.join(' ').toLowerCase()}">
+      ${
+        media
+          ? `<div class="menu-card-media"><img src="${media}" alt="${item.name}" loading="lazy" /></div>`
+          : ''
+      }
+      <div class="menu-card-body">
+        <div class="menu-card-top">
+          <h4 class="menu-card-name">${item.name}</h4>
+          <div class="menu-card-tags">${buildTagsHTML(item.tags)}</div>
+        </div>
+        <p class="menu-card-desc">${item.description}</p>
+        <div class="menu-card-prices">${buildPriceHTML(item.prices)}</div>
       </div>
-      <p class="menu-card-desc">${item.description}</p>
-      <div class="menu-card-prices">${buildPriceHTML(item.prices)}</div>
     </article>
   `;
 }
@@ -115,7 +148,7 @@ function renderCategories(categories) {
         </div>
       </div>
       <div class="menu-grid">
-        ${cat.items.map(renderMenuCard).join('')}
+        ${cat.items.map((item) => renderMenuCard(item, cat.id)).join('')}
       </div>
     </section>
   `
@@ -128,8 +161,12 @@ function filterAndRender() {
 
   const sections = $$('.menu-category-section');
   const noResults = $('#no-results');
+  const summary = $('#menu-results-summary');
+  const clearBtn = $('#menu-clear-search');
   const q = searchQuery.trim().toLowerCase();
   let anyVisible = false;
+  let visibleCards = 0;
+  let visibleSections = 0;
 
   sections.forEach((sec) => {
     const catId = sec.id.replace('cat-', '');
@@ -142,9 +179,12 @@ function filterAndRender() {
 
     if (!q) {
       // Show all cards in this section
-      $$('.menu-card', sec).forEach((c) => (c.style.display = ''));
+      const cards = $$('.menu-card', sec);
+      cards.forEach((c) => (c.style.display = ''));
       sec.classList.add('active');
       anyVisible = true;
+      visibleSections += 1;
+      visibleCards += cards.length;
       return;
     }
 
@@ -154,28 +194,92 @@ function filterAndRender() {
     cards.forEach((card) => {
       const matchName = card.dataset.name.includes(q);
       const matchDesc = card.dataset.desc.includes(q);
-      const visible = matchName || matchDesc;
+      const matchTags = card.dataset.tags.includes(q);
+      const visible = matchName || matchDesc || matchTags;
       card.style.display = visible ? '' : 'none';
-      if (visible) sectionHasVisible = true;
+      if (visible) {
+        sectionHasVisible = true;
+        visibleCards += 1;
+      }
     });
 
     if (sectionHasVisible) {
       sec.classList.add('active');
       anyVisible = true;
+      visibleSections += 1;
     } else {
       sec.classList.remove('active');
     }
   });
 
+  if (summary) {
+    const scope = serviceMode === 'remote' ? 'para pedido telefónico' : 'para consultar en el salón';
+    summary.textContent = q
+      ? `${visibleCards} opciones en ${visibleSections} categorías ${scope}.`
+      : `${visibleCards} opciones disponibles en ${visibleSections} categorías ${scope}.`;
+  }
+
+  if (clearBtn) {
+    clearBtn.hidden = !q;
+  }
+
   if (noResults) {
+    const noResultsQuery = $('#no-results-query');
+    if (noResultsQuery) noResultsQuery.textContent = searchQuery.trim();
     noResults.style.display = anyVisible ? 'none' : 'block';
   }
 }
 
+function renderServiceMode() {
+  const isRemote = serviceMode === 'remote';
+  const heroServiceCopy = $('#hero-service-copy');
+  const menuHeading = $('#menu-heading');
+  const menuIntroCopy = $('#menu-intro-copy');
+
+  if (heroServiceCopy) {
+    heroServiceCopy.textContent = isRemote
+      ? 'Elegí tus variedades favoritas, llamanos y prepará tu visita para pasar a retirarlo.'
+      : 'Abrí la carta, descubrí nuestros sabores y hacé tu pedido cuando estés listo.';
+  }
+
+  if (menuHeading) {
+    menuHeading.textContent = isRemote ? 'Carta para pedir y llevar' : 'Carta para disfrutar en el local';
+  }
+
+  if (menuIntroCopy) {
+    menuIntroCopy.textContent = isRemote
+      ? 'Buscá variedades y cantidades para llamar con tu pedido ya decidido.'
+      : 'Recorré la carta por categorías y elegí con calma tu próxima pizza, empanada o pasta.';
+  }
+
+  $$('.service-chip').forEach((button) => {
+    const active = button.dataset.service === serviceMode;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+
+  $$('[data-service-card]').forEach((card) => {
+    card.classList.toggle('is-active', card.dataset.serviceCard === serviceMode);
+  });
+
+  filterAndRender();
+}
+
 /* ── Promotions rendering ────────────────────────────────── */
 function renderPromos(promos) {
+  const section = $('#promos');
   const container = $('#promos-grid');
-  if (!container || !promos || promos.length === 0) return;
+  const navLink = $('.nav-link[href="#promos"]');
+  if (!container) return;
+
+  if (!promos || promos.length === 0) {
+    if (section) section.hidden = true;
+    if (navLink) navLink.hidden = true;
+    return;
+  }
+
+  if (section) section.hidden = false;
+  if (navLink) navLink.hidden = false;
 
   const icons = ['🍕', '🥂', '🥟', '🍺', '🌟'];
   container.innerHTML = promos
@@ -185,8 +289,8 @@ function renderPromos(promos) {
       <div class="promo-icon">${icons[i % icons.length]}</div>
       <h3>${promo.title}</h3>
       <p>${promo.description}</p>
-      <span class="promo-note">${promo.note}</span>
-      <div class="promo-price">${formatPrice(promo.price)} <small>por combo</small></div>
+      ${promo.note ? `<span class="promo-note">${promo.note}</span>` : ''}
+      ${promo.price > 0 ? `<div class="promo-price">${formatPrice(promo.price)}</div>` : `<div class="promo-cta">${promo.note || 'Consultar'}</div>`}
     </div>
   `
     )
@@ -195,24 +299,36 @@ function renderPromos(promos) {
 
 /* ── Restaurant info rendering ───────────────────────────── */
 function renderRestaurantInfo(restaurant) {
-  // Populate tagline in hero
+  priceFormat = {
+    locale: restaurant.locale || 'es-AR',
+    currency: restaurant.currency || 'ARS',
+    digits: Number.isFinite(restaurant.priceDigits) ? restaurant.priceDigits : 0,
+  };
+
   const taglineEl = $('#hero-tagline');
   if (taglineEl) taglineEl.textContent = restaurant.tagline;
 
   const descEl = $('#hero-desc');
   if (descEl) descEl.textContent = restaurant.description;
 
-  // Address & contact info cards
+  const heroHours = $('#hero-hours');
+  if (heroHours) heroHours.textContent = restaurant.hours.primary;
+
+  const heroAddressShort = $('#hero-address-short');
+  if (heroAddressShort) heroAddressShort.textContent = restaurant.address.split(',').slice(0, 2).join(',').trim();
+
+  const logoLocation = $('#logo-location');
+  if (logoLocation) logoLocation.textContent = restaurant.locationLabel;
+
+  const heroPhoneNumber = $('#hero-phone-number');
+  if (heroPhoneNumber) heroPhoneNumber.textContent = restaurant.phone;
+
   const addressEl = $('#info-address');
-  if (addressEl) addressEl.textContent = restaurant.address;
-
-  const addressMapEl = $('#info-address-map');
-  if (addressMapEl) addressMapEl.textContent = restaurant.address;
-
-  // Update Google Maps link with actual address
-  const mapsLink = $('#map-section a[href*="google"]');
-  if (mapsLink) {
-    mapsLink.href = `https://www.google.com/maps/search/${encodeURIComponent(restaurant.address)}`;
+  if (addressEl) {
+    addressEl.innerHTML = restaurant.address
+      .split(',')
+      .map((line) => `<span>${line.trim()}</span>`)
+      .join('<br>');
   }
 
   const phoneEl = $('#info-phone');
@@ -221,13 +337,21 @@ function renderRestaurantInfo(restaurant) {
     phoneEl.href = `tel:${restaurant.phone.replace(/\s/g, '')}`;
   }
 
+  $$('.phone-link').forEach((el) => {
+    el.href = `tel:${restaurant.phone.replace(/\s/g, '')}`;
+    el.setAttribute('title', `Llamar al ${restaurant.phone}`);
+  });
+
   const emailEl = $('#info-email');
+  const emailRow = $('#info-email-row');
   if (emailEl) {
     emailEl.textContent = restaurant.email;
     emailEl.href = `mailto:${restaurant.email}`;
   }
+  if (emailRow) {
+    emailRow.parentElement.style.display = restaurant.email ? '' : 'none';
+  }
 
-  // Footer contact links
   const footerPhone = $('#footer-phone');
   if (footerPhone) {
     footerPhone.textContent = restaurant.phone;
@@ -238,25 +362,51 @@ function renderRestaurantInfo(restaurant) {
   if (footerEmail) {
     footerEmail.textContent = restaurant.email;
     footerEmail.href = `mailto:${restaurant.email}`;
+    footerEmail.style.display = restaurant.email ? '' : 'none';
   }
 
+  const footerTagline = $('#footer-tagline');
+  if (footerTagline) footerTagline.textContent = restaurant.tagline;
+
+  const footerSignature = $('#footer-signature');
+  if (footerSignature) footerSignature.textContent = restaurant.footerSignature;
+
+  const hoursPrimaryLabel = $('#info-hours-primary-label');
+  if (hoursPrimaryLabel) hoursPrimaryLabel.textContent = restaurant.hours.primaryLabel;
+
   const hoursWeekEl = $('#info-hours-weekdays');
-  if (hoursWeekEl) hoursWeekEl.textContent = restaurant.hours.weekdays;
+  if (hoursWeekEl) hoursWeekEl.textContent = restaurant.hours.primary;
+
+  const hoursSecondaryLabel = $('#info-hours-secondary-label');
+  if (hoursSecondaryLabel) hoursSecondaryLabel.textContent = restaurant.hours.secondaryLabel;
 
   const hoursWeekendEl = $('#info-hours-weekends');
-  if (hoursWeekendEl) hoursWeekendEl.textContent = restaurant.hours.weekends;
+  if (hoursWeekendEl) hoursWeekendEl.textContent = restaurant.hours.secondary;
 
-  // WhatsApp button
-  $$('.whatsapp-link').forEach((el) => {
-    el.href = `https://wa.me/${restaurant.whatsapp}?text=Hola!%20Quiero%20hacer%20un%20pedido%20😊`;
-  });
+  const mapFrame = $('#info-map-frame');
+  if (mapFrame) {
+    mapFrame.src = `https://www.google.com/maps?q=${encodeURIComponent(restaurant.address)}&output=embed`;
+  }
 
-  // Social links
   const igLink = $('#link-instagram');
-  if (igLink) igLink.href = restaurant.social.instagram;
+  if (igLink) {
+    igLink.href = restaurant.social.instagram;
+    igLink.style.display = restaurant.social.instagram ? '' : 'none';
+  }
 
   const fbLink = $('#link-facebook');
-  if (fbLink) fbLink.href = restaurant.social.facebook;
+  if (fbLink) {
+    fbLink.href = restaurant.social.facebook;
+    fbLink.style.display = restaurant.social.facebook ? '' : 'none';
+  }
+
+  const justEatLink = $('#link-justeat');
+  if (justEatLink) {
+    justEatLink.href = restaurant.social.justeat;
+    justEatLink.style.display = restaurant.social.justeat ? '' : 'none';
+  }
+
+  document.title = restaurant.name;
 }
 
 /* ── Navigation helpers ──────────────────────────────────── */
@@ -295,7 +445,10 @@ function setupHamburger() {
 
   // Close on nav link click
   $$('.nav-link', nav).forEach((link) => {
-    link.addEventListener('click', () => nav.classList.remove('open'));
+    link.addEventListener('click', () => {
+      nav.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    });
   });
 }
 
@@ -313,11 +466,30 @@ function setupScrollTop() {
 /* ── Search ──────────────────────────────────────────────── */
 function setupSearch() {
   const input = $('#menu-search');
+  const clearBtn = $('#menu-clear-search');
   if (!input) return;
 
   input.addEventListener('input', (e) => {
     searchQuery = e.target.value;
     filterAndRender();
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchQuery = '';
+      input.value = '';
+      filterAndRender();
+      input.focus();
+    });
+  }
+}
+
+function setupServiceMode() {
+  $$('.service-chip').forEach((button) => {
+    button.addEventListener('click', () => {
+      serviceMode = button.dataset.service;
+      renderServiceMode();
+    });
   });
 }
 
@@ -348,15 +520,22 @@ function parseRestaurantMd(text) {
     description: fm.description || '',
     address:     fm.address     || '',
     phone:       fm.phone       || '',
-    whatsapp:    fm.whatsapp    || '',
     email:       fm.email       || '',
     hours: {
-      weekdays: fm.hours_weekdays || '',
-      weekends: fm.hours_weekends || '',
+      primaryLabel: fm.hours_primary_label || 'Atención',
+      primary: fm.hours_primary || '',
+      secondaryLabel: fm.hours_secondary_label || 'Cierre',
+      secondary: fm.hours_secondary || '',
     },
+    locationLabel: fm.location_label || '',
+    footerSignature: fm.footer_signature || '',
+    locale: fm.locale || 'es-AR',
+    currency: fm.currency || 'ARS',
+    priceDigits: Number(fm.price_digits || 0),
     social: {
       instagram: fm.instagram || '',
       facebook:  fm.facebook  || '',
+      justeat:   fm.justeat   || '',
     },
   };
 }
@@ -535,9 +714,11 @@ async function init() {
     renderTabs(menuData.categories);
     renderCategories(menuData.categories);
     setupSearch();
+    setupServiceMode();
     setupNavHighlight();
     setupHamburger();
     setupScrollTop();
+    renderServiceMode();
   } catch (err) {
     console.error('Error loading menu data:', err);
     const errDiv = $('#loading-error');
