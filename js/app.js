@@ -731,4 +731,19 @@ async function init() {
   }
 }
 
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator) || window.location.protocol === 'file:') {
+    return;
+  }
+
+  window.addEventListener('load', async () => {
+    try {
+      await navigator.serviceWorker.register('./sw.js');
+    } catch (err) {
+      console.warn('Service worker registration failed:', err);
+    }
+  });
+}
+
+registerServiceWorker();
 document.addEventListener('DOMContentLoaded', init);
