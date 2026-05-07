@@ -1,0 +1,22 @@
+# Project TODO
+
+- [x] Basic homepage layout with hero, menu, history, gallery, events, location, footer
+- [x] Header with logo in white and navigation
+- [x] Hero section with pizza/horno background
+- [x] Argentine flag waves below hero
+- [x] Notice bar (martes cerrado)
+- [x] History section
+- [x] Gallery section (artisan process)
+- [x] Menu section with categories and items
+- [x] Events section
+- [x] Location section with contact info
+- [x] Footer
+- [x] Upgrade to full-stack (database + auth)
+- [x] Database schema for menu categories and items
+- [x] Seed menu data into database
+- [x] API endpoints for public menu (read)
+- [x] API endpoints for admin menu CRUD
+- [x] Admin panel frontend at /admin
+- [x] Connect public menu to database (dynamic data)
+- [x] Write vitest tests for menu API
+- [x] Footer logo in white to stand out from blue background

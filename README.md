@@ -1,53 +1,70 @@
 # Costumbres Argentinas
 
-Static site for **Pizzería Costumbres Argentinas**, built as a content-driven restaurant menu and contact experience for GitHub Pages.
+Restaurant web app for Pizzeria Costumbres Argentinas.
 
-## Project structure
+This project is now a full-stack TypeScript app:
 
-- `index.html`: site markup and section structure
-- `css/styles.css`: responsive styles
-- `js/app.js`: menu rendering, search, service-mode toggle, and content loading
-- `data/restaurant.md`: restaurant details loaded into the UI
-- `data/menu.md`: menu categories, items, prices, and promotions
-- `assets/`: site images
-- `site.webmanifest`: installable web app metadata
-- `sw.js`: offline caching for the app shell and content files
-- `robots.txt` and `sitemap.xml`: search engine discovery assets
-- `.github/workflows/deploy.yml`: GitHub Pages deployment workflow
-- `docs/ux/`: UX research artifacts for the menu-ordering experience
+- React 19 + Vite frontend in `client/`
+- Express + tRPC backend in `server/`
+- Shared types/constants in `shared/`
+- Drizzle ORM schema and migrations in `drizzle/`
 
-## Content updates
+## Development
 
-Most day-to-day updates do not require code changes.
+Install dependencies:
 
-### Restaurant info
+```bash
+pnpm install
+```
 
-Edit `data/restaurant.md` to update:
+Run in development mode:
 
-- name and tagline
-- description
-- address and phone
-- opening hours
-- footer/location labels
-- social links
-- locale and currency formatting
+```bash
+pnpm dev
+```
 
-### Menu and promotions
+The app starts an Express server and uses Vite middleware in dev mode.
 
-Edit `data/menu.md` to update:
+## Build and production run
 
-- categories
-- menu items
-- descriptions
-- prices
-- promotions
+Build frontend and backend bundles:
 
-The JavaScript parser reads this markdown and renders the menu UI automatically.
+```bash
+pnpm build
+```
 
-## Local preview
+Start production server:
 
-This is a plain static site with no build step. Open `index.html` in a browser or serve the repository with any simple static file server.
+```bash
+pnpm start
+```
 
-## Deployment
+## Deployment options
 
-Deployments are handled through GitHub Pages via `.github/workflows/deploy.yml` on pushes to `main`.
+### 1) Frontend-only (GitHub Pages)
+
+`.github/workflows/deploy.yml` now builds the Vite client and deploys `dist/public` to GitHub Pages.
+
+Important:
+
+- Frontend pages that call `/api/trpc` require a deployed backend.
+- Set `VITE_API_BASE_URL` at build time if your API is hosted on another domain.
+
+Example:
+
+```bash
+VITE_API_BASE_URL=https://api.example.com pnpm exec vite build
+```
+
+### 2) Full-stack deployment (recommended)
+
+Deploy the Node server (`pnpm build` + `pnpm start`) to a platform like Render, Railway, Fly.io, or Azure App Service.
+
+Required runtime values depend on your integrations (database, auth, storage, etc.).
+
+## Environment variables
+
+- `PORT`: server port (default `3000`)
+- `NODE_ENV`: `development` or `production`
+- `VITE_BASE_PATH`: optional frontend base path (used for GitHub Pages subpath deployments)
+- `VITE_API_BASE_URL`: optional absolute API origin for client tRPC calls
