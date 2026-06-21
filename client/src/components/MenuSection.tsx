@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
-import { trpc } from "@/lib/trpc";
-import { Loader2 } from "lucide-react";
+import { buildStaticFullMenu } from "@shared/staticMenu";
 
 const categoryIcons: Record<string, string> = {
   "Empanadas": "🥟",
@@ -15,8 +14,7 @@ const categoryIcons: Record<string, string> = {
 export default function MenuSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  const { data: menuData, isLoading } = trpc.menu.fullMenu.useQuery();
+  const menuData = useMemo(() => buildStaticFullMenu(), []);
 
   // Filter only active categories and items
   const activeMenu = useMemo(() => {
@@ -69,75 +67,69 @@ export default function MenuSection() {
           </p>
         </motion.div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="animate-spin w-8 h-8 text-[#1B3A6B]" />
-          </div>
-        ) : (
-          <>
-            {/* Category Tabs */}
+        <>
+          {/* Category Tabs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex flex-wrap justify-center gap-2 md:gap-3 mb-12"
+          >
+            {activeMenu.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setActiveCategory(category.id)}
+                className={`px-4 md:px-6 py-2.5 rounded-full font-bold text-sm md:text-base transition-all duration-300 ${
+                  effectiveCategory === category.id
+                    ? "bg-[#1B3A6B] text-white shadow-lg scale-105"
+                    : "bg-white text-[#1B3A6B] hover:bg-[#1B3A6B]/10 shadow-sm"
+                }`}
+              >
+                <span className="mr-1.5">{categoryIcons[category.name] || "📋"}</span>
+                {category.name}
+              </button>
+            ))}
+          </motion.div>
+
+          {/* Menu Items Grid */}
+          {currentCategory && (
             <motion.div
+              key={effectiveCategory}
               initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex flex-wrap justify-center gap-2 md:gap-3 mb-12"
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
             >
-              {activeMenu.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
-                  className={`px-4 md:px-6 py-2.5 rounded-full font-bold text-sm md:text-base transition-all duration-300 ${
-                    effectiveCategory === category.id
-                      ? "bg-[#1B3A6B] text-white shadow-lg scale-105"
-                      : "bg-white text-[#1B3A6B] hover:bg-[#1B3A6B]/10 shadow-sm"
+              {currentCategory.items.map((item) => (
+                <div
+                  key={item.id}
+                  className={`bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 border hover:border-[#A8D4F0]/50 group ${
+                    item.isHighlighted
+                      ? "border-[#F4A261] ring-1 ring-[#F4A261]/30"
+                      : "border-[#A8D4F0]/20"
                   }`}
                 >
-                  <span className="mr-1.5">{categoryIcons[category.name] || "📋"}</span>
-                  {category.name}
-                </button>
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex-1">
+                      <h4 className="font-bold text-[#1B3A6B] group-hover:text-[#E63946] transition-colors">
+                        {item.isHighlighted && <span className="text-[#F4A261] mr-1">★</span>}
+                        {item.name}
+                      </h4>
+                      {item.description && (
+                        <p className="text-sm text-[#1B3A6B]/60 mt-1 leading-snug">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-[#E63946] font-black text-lg whitespace-nowrap">
+                      {item.price} €
+                    </span>
+                  </div>
+                </div>
               ))}
             </motion.div>
-
-            {/* Menu Items Grid */}
-            {currentCategory && (
-              <motion.div
-                key={effectiveCategory}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
-              >
-                {currentCategory.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 border hover:border-[#A8D4F0]/50 group ${
-                      item.isHighlighted
-                        ? "border-[#F4A261] ring-1 ring-[#F4A261]/30"
-                        : "border-[#A8D4F0]/20"
-                    }`}
-                  >
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex-1">
-                        <h4 className="font-bold text-[#1B3A6B] group-hover:text-[#E63946] transition-colors">
-                          {item.isHighlighted && <span className="text-[#F4A261] mr-1">★</span>}
-                          {item.name}
-                        </h4>
-                        {item.description && (
-                          <p className="text-sm text-[#1B3A6B]/60 mt-1 leading-snug">
-                            {item.description}
-                          </p>
-                        )}
-                      </div>
-                      <span className="text-[#E63946] font-black text-lg whitespace-nowrap">
-                        {item.price} €
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            )}
-          </>
-        )}
+          )}
+        </>
       </div>
     </section>
   );

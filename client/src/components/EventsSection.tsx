@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { PartyPopper, Gift, Users } from "lucide-react";
+import { STATIC_IMAGE_SRC } from "@/lib/staticImages";
 
 export default function EventsSection() {
   const ref = useRef(null);
@@ -12,7 +13,7 @@ export default function EventsSection() {
       {/* Background with image */}
       <div className="absolute inset-0">
         <img
-          src="/manus-storage/Celebracióndecostumbresargentinas_e18fbbce.png"
+          src={STATIC_IMAGE_SRC.celebration}
           alt="Celebración en Costumbres Argentinas"
           className="w-full h-full object-cover"
         />

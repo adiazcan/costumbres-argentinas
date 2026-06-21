@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { STATIC_IMAGE_SRC } from "@/lib/staticImages";
 
 export default function HistorySection() {
   const ref = useRef(null);
@@ -69,24 +70,24 @@ export default function HistorySection() {
           >
             <div className="space-y-4">
               <img
-                src="/manus-storage/Bolasdemasalistasparafermentar_edf1d274.png"
+                src={STATIC_IMAGE_SRC.doughBalls}
                 alt="Bolas de masa fermentando"
                 className="w-full h-48 object-cover rounded-2xl shadow-lg"
               />
               <img
-                src="/manus-storage/Pizzashorneándoseenhornoindustrial_b40deb89.png"
+                src={STATIC_IMAGE_SRC.ovenPizzas}
                 alt="Pizzas horneándose"
                 className="w-full h-64 object-cover rounded-2xl shadow-lg"
               />
             </div>
             <div className="space-y-4 pt-8">
               <img
-                src="/manus-storage/Prepizzapreparada_688f196a.png"
+                src={STATIC_IMAGE_SRC.prepizza}
                 alt="Prepizza preparada"
                 className="w-full h-64 object-cover rounded-2xl shadow-lg"
               />
               <img
-                src="/manus-storage/Bollospizza_e288ce0f.png"
+                src={STATIC_IMAGE_SRC.doughBuns}
                 alt="Bollos de pizza"
                 className="w-full h-48 object-cover rounded-2xl shadow-lg"
               />

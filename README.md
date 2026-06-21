@@ -2,12 +2,11 @@
 
 Restaurant web app for Pizzeria Costumbres Argentinas.
 
-This project is now a full-stack TypeScript app:
+This project is a static React + Vite site:
 
 - React 19 + Vite frontend in `client/`
-- Express + tRPC backend in `server/`
-- Shared types/constants in `shared/`
-- Drizzle ORM schema and migrations in `drizzle/`
+- Static menu data in `seed-menu.mjs`
+- Shared helpers in `shared/`
 
 ## Development
 
@@ -23,48 +22,28 @@ Run in development mode:
 pnpm dev
 ```
 
-The app starts an Express server and uses Vite middleware in dev mode.
+The app runs as a static Vite site with no server runtime.
 
-## Build and production run
+To edit the menu, update `seed-menu.mjs`.
 
-Build frontend and backend bundles:
+## Build and preview
+
+Build the static site:
 
 ```bash
 pnpm build
 ```
 
-Start production server:
+Preview the built site locally:
 
 ```bash
-pnpm start
+pnpm preview
 ```
 
-## Deployment options
+## Deployment
 
-### 1) Frontend-only (GitHub Pages)
-
-`.github/workflows/deploy.yml` now builds the Vite client and deploys `dist/public` to GitHub Pages.
-
-Important:
-
-- Frontend pages that call `/api/trpc` require a deployed backend.
-- Set `VITE_API_BASE_URL` at build time if your API is hosted on another domain.
-
-Example:
-
-```bash
-VITE_API_BASE_URL=https://api.example.com pnpm exec vite build
-```
-
-### 2) Full-stack deployment (recommended)
-
-Deploy the Node server (`pnpm build` + `pnpm start`) to a platform like Render, Railway, Fly.io, or Azure App Service.
-
-Required runtime values depend on your integrations (database, auth, storage, etc.).
+Deploy the contents of `dist/public/` to any static hosting platform, including GitHub Pages, Netlify, Cloudflare Pages, Azure Static Web Apps, or object storage.
 
 ## Environment variables
 
-- `PORT`: server port (default `3000`)
-- `NODE_ENV`: `development` or `production`
-- `VITE_BASE_PATH`: optional frontend base path (used for GitHub Pages subpath deployments)
-- `VITE_API_BASE_URL`: optional absolute API origin for client tRPC calls
+- `VITE_BASE_PATH`: optional frontend base path for subpath deployments

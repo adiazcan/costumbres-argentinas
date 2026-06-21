@@ -1,4 +1,5 @@
 import { Phone, MapPin, Clock } from "lucide-react";
+import { STATIC_IMAGE_SRC } from "@/lib/staticImages";
 
 export default function Footer() {
   return (
@@ -15,7 +16,7 @@ export default function Footer() {
           {/* Logo & About */}
           <div>
             <img
-              src="/manus-storage/Logocostumbres(Opcion1)_31a77d93.png"
+              src={STATIC_IMAGE_SRC.logo}
               alt="Costumbres Argentinas"
               className="h-16 w-auto mb-4 brightness-0 invert"
             />

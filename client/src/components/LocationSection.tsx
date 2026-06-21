@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { MapPin, Clock, Phone, Navigation } from "lucide-react";
+import { STATIC_IMAGE_SRC } from "@/lib/staticImages";
 
 export default function LocationSection() {
   const ref = useRef(null);
@@ -102,7 +103,7 @@ export default function LocationSection() {
           >
             <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
               <img
-                src="/manus-storage/PizzeríaCostumbresArgentinasencalleempedrada_e68b4278.png"
+                src={STATIC_IMAGE_SRC.storefront}
                 alt="Pizzería Costumbres Argentinas - Exterior"
                 className="w-full h-64 object-cover"
               />
