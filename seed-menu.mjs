@@ -1,12 +1,4 @@
-import { drizzle } from "drizzle-orm/mysql2";
-import { sql } from "drizzle-orm";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const db = drizzle(process.env.DATABASE_URL);
-
-const categories = [
+export const categories = [
   { name: "Empanadas", description: "Empanadas artesanales argentinas", sortOrder: 1 },
   { name: "Pastas", description: "Pastas caseras frescas", sortOrder: 2 },
   { name: "Pizzas", description: "Pizza tamaño mediano de 6 porciones. Opción elección mitad y mitad. También ofrecemos pizzas sin gluten, veganas y sin lactosa.", sortOrder: 3 },
@@ -14,7 +6,7 @@ const categories = [
   { name: "Postres y Café", description: "Dulces argentinos y cafetería", sortOrder: 5 },
 ];
 
-const items = {
+export const items = {
   "Empanadas": [
     { name: "Empanada de carne", price: "1.60", sortOrder: 1 },
     { name: "Empanada de Pollo", price: "1.60", sortOrder: 2 },
@@ -104,43 +96,3 @@ const items = {
     { name: "Infusiones", price: "1.50", sortOrder: 8 },
   ],
 };
-
-async function seed() {
-  console.log("Seeding menu data...");
-
-  // Insert categories
-  for (const cat of categories) {
-    await db.execute(sql`INSERT INTO menu_categories (name, description, sortOrder, isActive) VALUES (${cat.name}, ${cat.description}, ${cat.sortOrder}, true)`);
-  }
-
-  // Get category IDs
-  const catRows = await db.execute(sql`SELECT id, name FROM menu_categories ORDER BY sortOrder`);
-
-  const categoryMap = {};
-  for (const row of catRows[0]) {
-    categoryMap[row.name] = row.id;
-  }
-
-  console.log("Categories created:", categoryMap);
-
-  // Insert items
-  for (const [catName, catItems] of Object.entries(items)) {
-    const categoryId = categoryMap[catName];
-    if (!categoryId) {
-      console.error(`Category not found: ${catName}`);
-      continue;
-    }
-    for (const item of catItems) {
-      await db.execute(sql`INSERT INTO menu_items (categoryId, name, description, price, isActive, isHighlighted, sortOrder) VALUES (${categoryId}, ${item.name}, ${item.description || null}, ${item.price}, true, false, ${item.sortOrder})`);
-    }
-    console.log(`  Inserted ${catItems.length} items for ${catName}`);
-  }
-
-  console.log("Menu seeded successfully!");
-  process.exit(0);
-}
-
-seed().catch((err) => {
-  console.error("Seed failed:", err);
-  process.exit(1);
-});

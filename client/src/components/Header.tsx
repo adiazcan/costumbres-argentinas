@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Phone } from "lucide-react";
+import { STATIC_IMAGE_SRC } from "@/lib/staticImages";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -34,7 +35,7 @@ export default function Header() {
           {/* Logo */}
           <a href="#inicio" className="flex items-center gap-3">
             <img
-              src="/manus-storage/Logocostumbres(Opcion1)_31a77d93.png"
+              src={STATIC_IMAGE_SRC.logo}
               alt="Costumbres Argentinas"
               className={`h-16 lg:h-20 w-auto transition-all duration-300 ${
                 isScrolled ? "" : "brightness-0 invert"

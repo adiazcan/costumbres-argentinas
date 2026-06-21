@@ -1,30 +1,31 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { STATIC_IMAGE_SRC } from "@/lib/staticImages";
 
 const galleryImages = [
   {
-    src: "/manus-storage/Amasadoenmezcladoraindustrial_be3d940b.png",
+    src: STATIC_IMAGE_SRC.kneading,
     alt: "Amasado en mezcladora industrial",
     label: "Amasado",
   },
   {
-    src: "/manus-storage/Tríosdebandejasconmasadescansando_d489212e.png",
+    src: STATIC_IMAGE_SRC.restingTrays,
     alt: "Bandejas con masa descansando",
     label: "Fermentación",
   },
   {
-    src: "/manus-storage/Empanadaslistasparahornear_98f58e08.png",
+    src: STATIC_IMAGE_SRC.empanadas,
     alt: "Empanadas listas para hornear",
     label: "Preparación",
   },
   {
-    src: "/manus-storage/Pizzashorneándoseenhornoindustrial_b40deb89.png",
+    src: STATIC_IMAGE_SRC.ovenPizzas,
     alt: "Pizzas horneándose",
     label: "Horneado",
   },
   {
-    src: "/manus-storage/Motocicletasderepartoenlacalle_a664c26a.png",
+    src: STATIC_IMAGE_SRC.delivery,
     alt: "Motos de reparto",
     label: "Delivery",
   },
